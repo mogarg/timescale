@@ -1,6 +1,8 @@
 # Benchmarking
 
-Benchmarks takes a number of workers and a .csv file with format "hostname, start_time, end_time" (header included) to generate and benchmark query run time. Queries are allotted to workers based on hostnames (no two workers share queries that touch same hostnames).
+A tool for benchmarking TimeScaleDB
+
+Benchmarks takes the number of workers and a .csv file (.csv removed) with format "hostname, start_time, end_time" (header included) to generate and benchmark query run time. Queries are allotted to workers based on hostnames (no two workers share queries that touch the same hostnames).
 
 ## Build and Usage
 
@@ -12,9 +14,9 @@ go get github.com/mogarg/timescale
 
 ## Further Additions
 
-1. Testing
-2. Generating queries on the fly (currently uses a base query)
-3. Balanced Scheduling: Alot next hostname to some worker with the least amount of pending queries to run (could be useful for bigger workloads.
-4. More stats by percentiles.
-5. Any architectural changes suggested.
-6. Better errors handling if some queries fail.
+[] Testing
+[] Generating queries on the fly (currently uses a base query)
+[] Balanced Scheduling: Alot next hostname to some worker with the least amount of pending queries to run (could be useful for bigger workloads.
+[] More stats by percentiles.
+[] Any architectural changes suggested.
+[] Better errors handling if some queries fail.
