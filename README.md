@@ -6,6 +6,8 @@ Benchmarks takes the number of workers and a .csv file (.csv removed) with forma
 
 ## Build and Usage
 
+Set up PostgreSql server as defined in the assignment. 
+
 ```bash
 go get github.com/mogarg/timescale
 
