@@ -8,7 +8,7 @@ import (
 // Request takes a query and returns the results
 type Request struct {
 	query  Query
-	result chan time.Duration
+	result chan Result
 }
 
 // Query defines the model for building the queries
@@ -16,6 +16,11 @@ type Query struct {
 	Hostname  string
 	Starttime time.Time
 	Endtime   time.Time
+}
+
+type Result struct {
+	count    int
+	duration time.Duration
 }
 
 const (
@@ -27,22 +32,26 @@ const (
 	GROUP BY minute`
 )
 
-func (r *Request) runQuery(db *sql.DB) time.Duration {
+func (r *Request) runQuery(db *sql.DB) Result {
 
 	parsed, err := db.Prepare(baseQuery)
-
 	checkError(err)
 
 	query := r.query
+	resultCount := 0
 
 	var duration time.Duration
 
 	start := time.Now()
 
-	_, err = parsed.Exec(query.Hostname, query.Starttime, query.Endtime)
+	rows, err := parsed.Query(query.Hostname, query.Starttime, query.Endtime)
+
 	if err == nil {
 		duration = time.Now().Sub(start)
+		for rows.Next() {
+			resultCount++
+		}
 	}
 
-	return duration
+	return Result{resultCount, duration}
 }

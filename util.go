@@ -40,9 +40,9 @@ func parseCSV(filename string) (queries []Query) {
 		startime, err := time.Parse(timelayout, line[1])
 		endtime, err := time.Parse(timelayout, line[2])
 		if err != nil {
-			fmt.Print(line)
+			fmt.Printf("record on line %v: incorrect time format\n", line)
+			continue
 		}
-		checkError(err)
 
 		queries = append(queries, Query{
 			Hostname:  line[0],
@@ -52,6 +52,17 @@ func parseCSV(filename string) (queries []Query) {
 	}
 
 	return
+}
+
+// Map applies function f over an array of res to convert it to result timing
+func Map(res []Result, f func(time.Duration) float64) []ResultTiming {
+	resm := make([]ResultTiming, len(res))
+
+	for i := range res {
+		resm[i] = ResultTiming{f(res[i].duration), res[i].count}
+	}
+
+	return resm
 }
 
 func checkError(err error) {

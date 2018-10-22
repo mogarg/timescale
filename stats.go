@@ -6,60 +6,81 @@ import (
 	"time"
 )
 
-// Histogram is a representation of statistics
+// Stats encapsulates the stats for a list of time.Duration values
 type Stats struct {
 	Count   int
-	Minimum float64
+	Total   ResultTiming
 	Average float64
-	Maximum float64
 	Median  float64
+	Minimum ResultTiming
+	Maximum ResultTiming
 }
 
-//
-func (s *Stats) printStats() {
+// ResultTiming represents the time spent executing
+// a query and the number of results generated for the query
+type ResultTiming struct {
+	time    float64
+	results int
+}
 
-	fmt.Println("\n---------Stats--------")
-	fmt.Printf("Total Queries: %d\n", s.Count)
-	fmt.Printf("Minimum time:  %.2f ms\n", s.Minimum)
-	fmt.Printf("Maximum time:  %.2f ms\n", s.Maximum)
-	fmt.Printf("Average time:  %.2f ms\n", s.Average)
-	fmt.Printf("Median Time:   %.2f ms\n", s.Median)
-	fmt.Println("----------------------")
+func (rt *ResultTiming) stringify() string {
+	return fmt.Sprintf("%.2f ms (%d results)", rt.time, rt.results)
+}
+
+func (s *Stats) print() {
+
+	fmt.Println("")
+	fmt.Printf("Total queries:%d \n", s.Count)
+	fmt.Printf("Total time: %s\n", s.Total.stringify())
+	fmt.Printf("Average time: %.2f ms\n", s.Average)
+	fmt.Printf("Median Time:  %.2f ms\n", s.Median)
+	fmt.Printf("Minimum time: %s\n", s.Minimum.stringify())
+	fmt.Printf("Maximum time: %s\n", s.Maximum.stringify())
+	fmt.Println("")
 
 }
 
-// HistogramFromDurations returns a new statsogram for the durations
-func StatsFromDurations(durations []time.Duration) *Stats {
-	nanos := make([]float64, len(durations))
+// GetStats takes a list of Result values, creates and returns the Stat
+func GetStats(results []Result) *Stats {
+	stats := &Stats{}
+	var n int
 
-	for i, d := range durations {
-		nanos[i] = float64(d.Nanoseconds()) / float64(1000000)
+	durationToNS := func(d time.Duration) float64 {
+		return float64(d.Nanoseconds()) / float64(1000000)
 	}
 
-	stats := &Stats{}
+	resTimes := Map(results, durationToNS)
 
-	n := len(nanos)
+	sort.Slice(resTimes, func(i, j int) bool {
+		return resTimes[i].time < resTimes[j].time
+	})
+
+	n = len(resTimes)
 
 	if n == 0 {
 		return stats
 	}
 
-	sort.Float64s(nanos)
-
 	stats.Count = n
-	stats.Minimum = nanos[0]
-	stats.Maximum = nanos[n-1]
+	stats.Minimum = resTimes[0]
+	stats.Maximum = resTimes[n-1]
 
-	stats.Average = nanos[0]
-	for _, x := range nanos {
-		stats.Average += x
+	totalTime := 0.0
+	totalRes := 0
+
+	for _, rt := range resTimes {
+		totalTime += rt.time
+		totalRes += rt.results
 	}
-	stats.Average /= float64(len(nanos))
 
-	if n%2 == 0 {
-		stats.Median = (nanos[n/2] + nanos[n/2+1]) / 2
+	stats.Total = ResultTiming{totalTime, totalRes}
+
+	stats.Average = totalTime / float64(len(resTimes))
+
+	if n%2 == 0 && n > 1 {
+		stats.Median = (resTimes[n/2].time + resTimes[n/2+1].time) / 2
 	} else {
-		stats.Median = nanos[n/2]
+		stats.Median = resTimes[n/2].time
 	}
 
 	return stats

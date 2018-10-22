@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -54,16 +53,16 @@ func main() {
 }
 
 func request(work chan Request, queries []Query, done chan struct{}) {
-	c := make(chan time.Duration)
+	c := make(chan Result)
 
-	durations := make([]time.Duration, 0, len(queries))
+	results := make([]Result, 0, len(queries))
 
 	for _, query := range queries {
 		work <- Request{query, c}
-		durations = append(durations, <-c)
+		results = append(results, <-c)
 	}
 
-	StatsFromDurations(durations).printStats()
+	GetStats(results).print()
 
 	done <- struct{}{}
 }
