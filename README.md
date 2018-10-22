@@ -14,9 +14,9 @@ go get github.com/mogarg/timescale
 
 ## Further Additions
 
--[] Testing
--[] Generating queries on the fly (currently uses a base query)
--[] Balanced Scheduling: Alot next hostname to some worker with the least amount of pending queries to run (could be useful for bigger workloads.
--[] More stats by percentiles.
--[] Any architectural changes suggested.
--[] Better errors handling if some queries fail.
+-[ ] Testing
+-[ ] Generating queries on the fly (currently uses a base query)
+-[ ] Balanced Scheduling: Alot next hostname to some worker with the least amount of pending queries to run (could be useful for bigger workloads.
+-[ ] More stats by percentiles.
+-[ ] Any architectural changes suggested.
+-[ ] Better errors handling if some queries fail.
